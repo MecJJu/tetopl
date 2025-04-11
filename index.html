@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>🎧 Kasane Teto Playlist 🎵</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300&display=swap');
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #000;
+      color: #fff;
+      font-family: 'Noto Sans KR', sans-serif;
+      overflow-x: hidden;
+    }
+
+    .bg-image {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      filter: blur(20px) brightness(0.4);
+      opacity: 0;
+      transition: opacity 0.6s ease;
+      z-index: -1;
+    }
+
+    .bg-image.active {
+      opacity: 1;
+    }
+
+    #audioSelect {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 6px 12px;
+      font-size: 16px;
+      border-radius: 10px;
+      border: 1px solid #444;
+      background-color: #111;
+      color: #fff;
+      max-width: 250px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-family: 'Noto Sans KR', sans-serif;
+      box-shadow: 0 0 8px rgba(255, 255, 255, 0.1);
+      transition: border-color 0.3s, background-color 0.3s;
+    }
+
+    #audioSelect:hover {
+      background-color: #1a1a1a;
+    }
+
+    #audioSelect:focus {
+      outline: none;
+      border-color: #fff;
+    }
+
+    .top-label {
+      position: fixed;
+      top: 26px;
+      right: 290px;
+      color: #aaa;
+      font-size: 14px;
+    }
+
+    .bg-label {
+      position: fixed;
+      top: 20px;
+      left: 100px;
+      color: #aaa;
+      font-size: 14px;
+    }
+
+    #bgToggleBtn {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      font-size: 14px;
+      padding: 6px 16px;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      background-color: #555;
+      color: #fff;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+      text-align: center;
+    }
+
+    #albumImage {
+      width: 300px;
+      height: 300px;
+      object-fit: cover;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(255,255,255,0.2);
+      margin-bottom: 20px;
+    }
+
+    .scroll-title-wrapper {
+      width: 300px;
+      height: 30px;
+      overflow: hidden;
+      position: relative;
+      margin-bottom: 8px;
+    }
+
+    #songTitle {
+      position: absolute;
+      white-space: nowrap;
+    }
+
+    .scroll-title {
+      position: absolute;
+      white-space: nowrap;
+      animation: scrollText 15s linear infinite;
+    }
+
+    .centered-title {
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    @keyframes scrollText {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    #producer {
+      font-size: 14px;
+      color: #aaa;
+      margin-bottom: 20px;
+    }
+
+    .controls-wrapper {
+      width: 500px;
+      margin-bottom: 20px;
+      position: relative;
+      height: 48px;
+    }
+
+    .side-button {
+      font-size: 14px;
+      padding: 6px 16px;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      position: absolute;
+      top: 0;
+    }
+
+    #randomBtn {
+      left: 0;
+    }
+
+    #autoplayToggleBtn.on {
+      background-color: #fff;
+      color: #000;
+    }
+
+    #autoplayToggleBtn.off {
+      background-color: #555;
+      color: #fff;
+    }
+
+    #autoplayToggleBtn {
+      right: 0;
+    }
+
+    .main-controls {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .main-controls button {
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    .main-controls svg {
+      width: 36px;
+      height: 36px;
+      fill: white;
+    }
+
+    #bgToggleBtn.on {
+      background-color: #fff;
+      color: #000;
+    }
+
+    #bgToggleBtn.off {
+      background-color: #555;
+      color: #fff;
+    }
+
+    #progressContainer {
+      width: 500px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+
+    #progressBar {
+      width: 100%;
+      height: 5px;
+      background-color: #444;
+      border-radius: 5px;
+      margin-bottom: 5px;
+      position: relative;
+      cursor: pointer;
+    }
+
+    #progressFill {
+      height: 100%;
+      background-color: #fff;
+      width: 0%;
+    }
+
+    #progressHandle {
+      position: absolute;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 14px;
+      height: 14px;
+      background-color: #fff;
+      border-radius: 50%;
+      pointer-events: auto;
+      cursor: pointer;
+    }
+
+    .time-display {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      color: #aaa;
+    }
+
+  </style>
+</head>
+<body>
+
+<img id="backgroundImageOld" class="bg-image" />
+<img id="backgroundImageNew" class="bg-image active" />
+<button id="bgToggleBtn" class="off">OFF</button>
+<span class="bg-label">배경</span>
+<span class="top-label">음악 선택</span>
+<select id="audioSelect"></select>
+
+<div class="container">
+  <img src="" alt="앨범 자켓" id="albumImage">
+  <div class="scroll-title-wrapper"><div id="songTitle"></div></div>
+  <div id="producer"></div>
+
+  <div class="controls-wrapper">
+    <button id="randomBtn" class="side-button off" style="background-color:#555; color:#fff;">RANDOM</button>
+    <div class="main-controls">
+      <button id="prevBtn"><svg viewBox="0 0 24 24"><path d="M6 19h2V5H6v14zm3.5-7l8.5 6V6l-8.5 6z"/></svg></button>
+      <button id="audioToggleBtn"><svg id="playIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+      <button id="nextBtn"><svg viewBox="0 0 24 24"><path d="M16 5v14h2V5h-2zm-2.5 7L5 6v12l8.5-6z"/></svg></button>
+    </div>
+    <button id="autoplayToggleBtn" class="side-button off">AUTO</button>
+  </div>
+
+  <div id="progressContainer">
+    <div id="progressBar">
+      <div id="progressFill"></div>
+      <div id="progressHandle"></div>
+    </div>
+    <div class="time-display">
+      <span id="currentTime">00:00</span>
+      <span id="totalTime">00:00</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  const playlist = [
+    { file: '장난기기능.mp3', image: '장난기기능.jpg', prod: 'ゴジマジP', title: '【重音テト】おちゃめ機能' },
+    { file: '사람마니아.mp3', image: '사람마니아.jpg', prod: '原口沙輔', title: '人マニア - 重音テト' },
+    { file: '의학.mp3', image: '의학.jpg', prod: '原口沙輔', title: 'イガク - 重音テト' },
+    { file: '펌블!.mp3', image: '펌블!.jpg', prod: '藤原ハガネ', title: 'ふぁんぶる！/ 重音テト' },
+    { file: '디버그드러그.mp3', image: '디버그드러그.jpg', prod: 'ルシノ', title: 'デバッグドラッグ feat. 重音テト' },
+    { file: '두통.mp3', image: '두통.jpg', prod: 'えいぷ', title: '頭ン痛 / 重音テト' },
+    { file: '급성연애중독.mp3', image: '급성연애중독.jpg', prod: 'ぴーなた', title: 'ぴーなた-急性恋愛中毒 feat.重音テト' },
+    { file: '오버라이드.mp3', image: '오버라이드.jpg', prod: '吉田夜世', title: 'オーバーライド - 重音テト' },
+    { file: '2대염라대왕.mp3', image: '2대염라대왕.jpg', prod: '読谷あかね', title: '2代目閻魔 / 重音テト' },
+    { file: '저주.mp3', image: '저주.jpg', prod: '黒うさぎ', title: 'のろい - 重音テト' },
+    { file: 'DNA.mp3', image: 'DNA.jpg', prod: 'Azari', title: 'D/N/A - 重音テト, flower' },
+    { file: '기구.mp3', image: '기구.jpg', prod: 'SAASA', title: '启普apparatus ft.重音テト' },
+    { file: '엔드오브페이크!.mp3', image: '엔드오브페이크!.jpg', prod: 'ミ瑞', title: 'エンド・オブ・フェイク！ / 重音テト' },
+    { file: '거울보는거.mp3', image: '거울보는거.jpg', prod: 'かるむ', title: 'めのうの釣り針/重音テト' }, //임시이름
+    { file: '리틀보이.mp3', image: '리틀보이.jpg', prod: '佐藤ちなみに', title: 'リトルボーイ / 初音ミク・重音テト' },
+    { file: 'BadTaste.mp3', image: 'BadTaste.jpg', prod: 'om', title: 'Bad Taste ft. Kasane Teto' },
+    { file: 'RBFSYNDROME.mp3', image: 'RBFSYNDROME.jpg', prod: 'om', title: 'RBF SYNDROME / Kasane Teto' },
+    { file: '엑스트라히어로.mp3', image: '엑스트라히어로.jpg', prod: '404p', title: '엑스트라 히어로 (feat. 카사네 테토)' },
+    { file: '파사드질문.mp3', image: '파사드질문.jpg', prod: 'サツキ', title: 'ファサード・クエスチョン / 初音ミク・重音テト' },
+    { file: '메스머라이저.mp3', image: '메스머라이저.jpg', prod: 'サツキ', title: 'メズマライザー / 初音ミク・重音テト' },
+    { file: '라이어댄서.mp3', image: '라이어댄서.jpg', prod: 'マサラダ', title: 'ライアーダンサー' },
+    { file: '무대공포증.mp3', image: '무대공포증.jpg', prod: 'にほしか', title: 'アガリ症 / 重音テト' },
+    { file: '레이트니스.mp3', image: '레이트니스.jpg', prod: 'にほしか', title: 'レイトネス / 重音テト' },
+    { file: '테토리스.mp3', image: '테토리스.jpg', prod: '柊マグネタイト', title: 'テトリス / 重音テト' }
+  ];
+
+  const audio = new Audio();
+  let currentIndex = 0;
+  let isPlaying = false;
+  let isAutoplay = false;
+  let isDragging = false;
+  let isRandom = false;
+
+  const audioSelect = document.getElementById('audioSelect');
+  const albumImage = document.getElementById('albumImage');
+  const songTitle = document.getElementById('songTitle');
+  const producer = document.getElementById('producer');
+  const playIcon = document.getElementById('playIcon');
+  const bgToggleBtn = document.getElementById('bgToggleBtn');
+  const backgroundImage = document.getElementById('backgroundImage');
+  const autoplayBtn = document.getElementById('autoplayToggleBtn');
+  const randomBtn = document.getElementById('randomBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const prevBtn = document.getElementById('prevBtn');
+  const progressBar = document.getElementById('progressBar');
+  const progressFill = document.getElementById('progressFill');
+  const progressHandle = document.getElementById('progressHandle');
+  const currentTimeSpan = document.getElementById('currentTime');
+  const totalTimeSpan = document.getElementById('totalTime');
+
+  playlist.forEach((song, i) => {
+    const opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = song.title;
+    audioSelect.appendChild(opt);
+  });
+
+  function loadSong(index) {
+    const song = playlist[index];
+    currentIndex = index;
+
+    audio.src = song.file;
+    albumImage.src = song.image;
+    producer.textContent = song.prod;
+    audioSelect.value = index;
+
+    const wrapper = document.querySelector('.scroll-title-wrapper');
+    songTitle.className = '';
+    songTitle.textContent = song.title;
+
+    requestAnimationFrame(() => {
+      if (songTitle.scrollWidth > wrapper.clientWidth) {
+        songTitle.textContent = song.title + '       ' + song.title;
+        songTitle.classList.add('scroll-title');
+      } else {
+        songTitle.classList.add('centered-title');
+      }
+    });
+
+    updateBackground(song.image);
+  }
+
+
+  function updateBackground(newSrc) {
+    if (!bgToggleBtn.classList.contains('on')) return;
+
+    const oldImg = document.getElementById('backgroundImageOld');
+    const newImg = document.getElementById('backgroundImageNew');
+
+    newImg.src = newSrc;
+    newImg.onload = () => {
+      newImg.classList.add('active');
+      oldImg.classList.remove('active'); 
+
+      // swap IDs for next transition
+      newImg.id = 'backgroundImageOld';
+      oldImg.id = 'backgroundImageNew';
+    };
+  }
+
+
+  bgToggleBtn.addEventListener('click', () => {
+    bgToggleBtn.classList.toggle('on');
+    bgToggleBtn.classList.toggle('off');
+    bgToggleBtn.textContent = bgToggleBtn.classList.contains('on') ? 'ON' : 'OFF';
+
+    if (bgToggleBtn.classList.contains('on')) {
+      updateBackground(playlist[currentIndex].image); // 배경 적용
+    } else {
+      // 배경 OFF 시, 이미지 숨기기
+      document.getElementById('backgroundImageOld').classList.remove('active');
+      document.getElementById('backgroundImageNew').classList.remove('active');
+    }
+  });
+
+
+  randomBtn.addEventListener('click', () => {
+    isRandom = !isRandom;
+    randomBtn.classList.toggle('on', isRandom);
+    randomBtn.classList.toggle('off', !isRandom);
+    randomBtn.style.backgroundColor = isRandom ? '#fff' : '#555';
+    randomBtn.style.color = isRandom ? '#000' : '#fff';
+  });
+
+  autoplayBtn.addEventListener('click', () => {
+    isAutoplay = !isAutoplay;
+    autoplayBtn.textContent = isAutoplay ? 'AUTO' : 'AUTO';
+    autoplayBtn.classList.toggle('on', isAutoplay);
+    autoplayBtn.classList.toggle('off', !isAutoplay);
+  });
+
+  function playSong() {
+    audio.play();
+    isPlaying = true;
+    playIcon.innerHTML = '<path d="M6 19h4V5H6zm8-14v14h4V5h-4z"/>';
+  }
+
+  document.getElementById('audioToggleBtn').addEventListener('click', () => {
+    if (!isPlaying) playSong();
+    else {
+      audio.pause();
+      isPlaying = false;
+      playIcon.innerHTML = '<path d="M8 5v14l11-7z" />';
+    }
+  });
+
+  nextBtn.addEventListener('click', () => {
+    currentIndex = isRandom ? Math.floor(Math.random() * playlist.length) : (currentIndex + 1) % playlist.length;
+    loadSong(currentIndex);
+    if (isPlaying) playSong();
+  });
+
+  prevBtn.addEventListener('click', () => {
+    currentIndex = isRandom ? Math.floor(Math.random() * playlist.length) : (currentIndex - 1 + playlist.length) % playlist.length;
+    loadSong(currentIndex);
+    if (isPlaying) playSong();
+  });
+
+  audioSelect.addEventListener('change', () => {
+    loadSong(parseInt(audioSelect.value));
+    if (isPlaying) playSong();
+  });
+
+  audio.addEventListener('ended', () => {
+    if (isAutoplay) nextBtn.click();
+    else {
+      isPlaying = false;
+      playIcon.innerHTML = '<path d="M8 5v14l11-7z" />';
+    }
+  });
+
+  audio.addEventListener('timeupdate', () => {
+    if (!isDragging) {
+      const percent = (audio.currentTime / audio.duration) * 100;
+      progressFill.style.width = `${percent}%`;
+      progressHandle.style.left = `${percent}%`;
+      currentTimeSpan.textContent = formatTime(audio.currentTime);
+    }
+  });
+
+  audio.addEventListener('loadedmetadata', () => {
+    totalTimeSpan.textContent = formatTime(audio.duration);
+  });
+
+  progressBar.addEventListener('click', e => {
+    const rect = progressBar.getBoundingClientRect();
+    const percent = (e.clientX - rect.left) / rect.width;
+    audio.currentTime = percent * audio.duration;
+  });
+
+  progressHandle.addEventListener('mousedown', () => isDragging = true);
+  window.addEventListener('mouseup', () => isDragging = false);
+  window.addEventListener('mousemove', e => {
+    if (isDragging) {
+      const rect = progressBar.getBoundingClientRect();
+      let percent = (e.clientX - rect.left) / rect.width;
+      percent = Math.max(0, Math.min(1, percent));
+      progressFill.style.width = `${percent * 100}%`;
+      progressHandle.style.left = `${percent * 100}%`;
+      audio.currentTime = percent * audio.duration;
+    }
+  });
+
+  function formatTime(sec) {
+    const m = Math.floor(sec / 60).toString().padStart(2, '0');
+    const s = Math.floor(sec % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+  }
+
+  loadSong(0);
+</script>
+</body>
+</html>
