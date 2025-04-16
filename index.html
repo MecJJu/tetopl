@@ -316,7 +316,7 @@
     { file: '엑스트라히어로.mp3', image: '엑스트라히어로.jpg', prod: '404p', title: '엑스트라 히어로 (feat. 카사네 테토)' },
     { file: '파사드질문.mp3', image: '파사드질문.jpg', prod: 'サツキ', title: 'ファサード・クエスチョン / 初音ミク・重音テト' },
     { file: '메스머라이저.mp3', image: '메스머라이저.jpg', prod: 'サツキ', title: 'メズマライザー / 初音ミク・重音テト' },
-    { file: '라이어댄서.mp3', image: '라이어댄서.jpg', prod: 'マサラダ', title: 'ライアーダンサー' },
+    { file: '라이어댄서.mp3', image: '라이어댄서.jpg', prod: 'マサラダ', title: 'ライアーダンサー / 重音テト' },
     { file: '무대공포증.mp3', image: '무대공포증.jpg', prod: 'にほしか', title: 'アガリ症 / 重音テト' },
     { file: '레이트니스.mp3', image: '레이트니스.jpg', prod: 'にほしか', title: 'レイトネス / 重音テト' },
     { file: '테토리스.mp3', image: '테토리스.jpg', prod: '柊マグネタイト', title: 'テトリス / 重音テト' }
@@ -358,6 +358,16 @@
     currentIndex = index;
 
     audio.src = song.file;
+
+    // 곡 볼륨 조절
+    if (song.title === '人マニア - 重音テト') {
+      audio.volume = 0.45;
+    } else if (song.title === 'イガク - 重音テト') {
+      audio.volume = 0.35;
+    } else {
+      audio.volume = 1.0;
+    }
+
     albumImage.src = song.image;
     producer.textContent = song.prod;
     audioSelect.value = index;
