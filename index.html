@@ -257,6 +257,28 @@
       color: #aaa;
     }
 
+    /* 마스터 볼륨 슬라이더 (오른쪽 고정) */
+    #masterVolumeContainer {
+      position: fixed;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      height: 200px;
+      display: flex;
+      align-items: center;
+      z-index: 999;
+    }
+
+    #masterVolume {
+      writing-mode: bt-lr; /* 수직 슬라이더 */
+      -webkit-appearance: slider-vertical;
+      width: 8px;
+      height: 200px;
+      background: #aaa;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
   </style>
 </head>
 <body>
@@ -293,6 +315,10 @@
       <span id="totalTime">00:00</span>
     </div>
   </div>
+</div>
+
+<div id="masterVolumeContainer">
+  <input type="range" id="masterVolume" min="0" max="1" step="0.01" value="1" />
 </div>
 
 <script>
@@ -531,6 +557,24 @@
   }
 
   loadSong(0);
+
+  // 마스터 볼륨 슬라이더 설정
+  const masterVolumeSlider = document.getElementById('masterVolume');
+
+  // 저장된 볼륨 값 불러오기
+  const savedVolume = localStorage.getItem('masterVolume');
+  if (savedVolume !== null) {
+    masterVolumeSlider.value = savedVolume;
+    audio.volume = parseFloat(savedVolume);
+  }
+
+  // 슬라이더 변경 시 볼륨 적용 + 저장
+  masterVolumeSlider.addEventListener('input', () => {
+    const newVolume = parseFloat(masterVolumeSlider.value);
+    audio.volume = newVolume;
+    localStorage.setItem('masterVolume', newVolume);
+  });
+
 </script>
 </body>
 </html>
